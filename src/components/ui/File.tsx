@@ -3,7 +3,9 @@
 import { useState, useRef, useEffect } from "react";
 import { Inter } from "next/font/google";
 
-const inter = Inter();
+const inter = Inter({
+  subsets: ['latin-ext']
+});
 
 interface FileInter {
   iconName: string;
