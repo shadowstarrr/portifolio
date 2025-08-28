@@ -1,103 +1,154 @@
+"use client";
+
+import { Inter, Press_Start_2P } from "next/font/google";
+import { useEffect, useState } from "react";
+import { useRouter } from 'next/navigation';
 import Image from "next/image";
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+const pressstart2p = Press_Start_2P({ weight: "400", subsets: ["latin"] });
+const inter = Inter({ weight: "400", subsets: ["latin"] });
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+const messages = [
+  "[  OK  ] Booting ShadowOS Kernel 5.13.0-shadow (x86_64)...",
+  "[  OK  ] Initializing virtual memory manager...",
+  "[  OK  ] Detected CPU: 8-Core ShadowEngine 3.2GHz",
+  "[  OK  ] Enabling ShadowSecure (SSP)...",
+  "[  OK  ] Initializing hardware abstraction layer...",
+  "[  OK  ] Mounting root filesystem at /dev/sda1",
+  "[  OK  ] Mounting /boot",
+  "[  OK  ] Mounting /home",
+  "[  OK  ] Starting udev daemon...",
+  "[  OK  ] Detecting hardware devices...",
+  "[  OK  ] Initializing device manager...",
+  "[  OK  ] Loading kernel modules...",
+  "[  OK  ] Loaded module: shadow-gpu",
+  "[  OK  ] Loaded module: shadow-sound",
+  "[  OK  ] Activating swap partition...",
+  "[  OK  ] Swap active on /dev/sda2 (2GiB)",
+  "[  OK  ] Setting hostname to 'shadowos'",
+  "[  OK  ] Starting system logging service...",
+  "[  OK  ] systemd-journald started.",
+  "[  OK  ] Starting D-Bus system message bus...",
+  "[  OK  ] dbus-daemon running with PID 201",
+  "[  OK  ] Applying ShadowOS security policies...",
+  "[  OK  ] ShadowGuard enabled. Status: ENFORCING",
+  "[  OK  ] Initializing network interfaces...",
+  "[  OK  ] Bringing up interface enp0s3...",
+  "[  OK  ] Requesting DHCP lease...",
+  "[FAILED] uhhh hi! have a nice day",
+  "[  OK  ] Lease acquired: 192.168.1.42",
+  "[  OK  ] Gateway: 192.168.1.1 | DNS: 8.8.8.8",
+  "[  OK  ] Starting NTP service...",
+  "[  OK  ] System clock synchronized to time server.",
+  "[  OK  ] Starting user login services...",
+  "[  OK  ] shadow-root.service started.",
+  "[  OK  ] Mounting encrypted user volumes...",
+  "[  OK  ] /home/user unlocked and mounted.",
+  "[  OK  ] Starting Shadow Audio Manager...",
+  "[FAILED] Failed to load pulse-audio daemon. Fallback active.",
+  "[  OK  ] Starting graphical target (Wayland)...",
+  "[  OK  ] Wayland display server running on :0",
+  "[  OK  ] Starting Shadow Display Manager (SDM)...",
+  "[  OK  ] SDM running as PID 389",
+  "[  OK  ] Launching ShadowOS Session Manager...",
+  "[  OK  ] Session environment loaded for user: user",
+  "[FAILED] Smoke but",
+  "[  OK  ] Boot completed in 3.8s",
+  "[  OK  ] Welcome to ShadowOS.",
+];
+
+export default function Home() {
+  const [visibleMessages, setVisibleMessages] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    const hasLogged = localStorage.getItem('hasLogged');
+    if (hasLogged === "true") {
+      router.push('/system');
+    }
+  }, [router]);
+
+  useEffect(() => {
+  let current = 0;
+
+  const showNextMessage = () => {
+    if (current < messages.length) {
+      setVisibleMessages((prev) => [...prev, messages[current]]);
+      current++;
+
+      const delay = current === 15 ? 6000 : 300; // ⏸️ pausa de 10s no 15º
+      setTimeout(showNextMessage, delay);
+    } else {
+      setTimeout(() => setLoading(false), 1000);
+    }
+  };
+
+  showNextMessage();
+  }, []);
+
+  useEffect(() => {
+    if (loading) return;
+
+    const timeout = setTimeout(() => {
+      localStorage.setItem('hasLogged', "true");
+      router.push('/system');
+    }, 5000);
+
+    return () => clearTimeout(timeout);
+  }, [loading, router]);
+
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-black text-sm font-mono px-6 py-10">
+        <div className="space-y-1">
+          {visibleMessages
+            .filter(Boolean)
+            .map((msg, i) => (
+              <p key={i} className="text-white font-vga">
+                {msg.split(/(\[\s*(?:OK|FAILED)\s*\])/).map((part, index) => {
+                  if (/\[\s*OK\s*\]/.test(part)) {
+                    return (
+                      <span key={index} className="text-green-400">
+                        {part}
+                      </span>
+                    );
+                  } else if (/\[\s*FAILED\s*\]/.test(part)) {
+                    return (
+                      <span key={index} className="text-red-500">
+                        {part}
+                      </span>
+                    );
+                  }
+                  return <span key={index}>{part}</span>;
+                })
+                }
+              </p>
+            ))}
         </div>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+    );
+  }
+
+  return (
+    <main className="flex justify-center items-center min-h-screen bg-[#0B1522] p-4">
+      <div className="flex flex-col items-center justify-center w-[600px] h-[480px] bg-[#0E1A2B] rounded-2xl gap-6 shadow-lg">
+        <div className="flex flex-col items-center justify-center gap-4 w-[400px] h-[320px] bg-[#0C1728] border-2 border-[#0C1728] rounded-xl p-4">
           <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+            src="/avatar.png"
+            alt="Avatar"
+            width={200}
+            height={120}
+            className="object-contain"
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          <h1 className={`text-3xl text-white ${pressstart2p.className}`}>
+            ShadowOS
+          </h1>
+        </div>
+        <p className={`text-lg text-white ${inter.className}`}>
+          Welcome to ShadowOS
+        </p>
+      </div>
+    </main>
   );
 }
